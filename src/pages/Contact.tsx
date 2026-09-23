@@ -3,7 +3,7 @@ import { Mail, MessageSquare, Heart, Check, ArrowRight } from 'lucide-react';
 import { useSEO } from '@/hooks/useSEO';
 import ScrollReveal from '@/components/ScrollReveal';
 import LocationFields, { type LocationData } from '@/components/LocationFields';
-import { insertContactMessage, insertPrayerRequest, insertNewsletterSubscriber } from '@/lib/supabase';
+import { insertPrayerRequest, insertNewsletterSubscriber } from '@/lib/supabase';
 
 type FormType = 'contact' | 'prayer' | 'newsletter';
 
@@ -17,6 +17,7 @@ export default function ContactPage() {
   const [active, setActive]         = useState<FormType>('contact');
   const [submitted, setSubmitted]   = useState<FormType | null>(null);
   const [formError, setFormError]   = useState('');
+  const [isSending, setIsSending]   = useState(false);
 
   const [cData, setCData]   = useState({ name:'', email:'', subject:'', message:'', location:{country:'',city_region:''} as LocationData });
   const [pData, setPData]   = useState({ name:'', email:'', request:'', location:{country:'',city_region:''} as LocationData });
@@ -30,6 +31,50 @@ export default function ContactPage() {
     { id:'prayer' as FormType,     icon:Heart,         label:'Prayer Request',    desc:'Share your prayer needs with us' },
     { id:'newsletter' as FormType, icon:MessageSquare, label:'Newsletter Signup', desc:'Stay updated on new content' },
   ];
+
+  async function handleContactSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFormError('');
+
+    if (!cData.location.country) {
+      setFormError('Please select your country.');
+      return;
+    }
+
+    setIsSending(true);
+
+    try {
+      const response = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cData.name,
+          email: cData.email,
+          subject: cData.subject,
+          message: cData.message,
+          country: cData.location.country,
+          city_region: cData.location.city_region,
+        }),
+      });
+
+      const result = await response.json().catch(() => ({})) as {
+        error?: string | { message?: string };
+      };
+
+      if (!response.ok) {
+        const message = typeof result.error === 'string'
+          ? result.error
+          : result.error?.message;
+        throw new Error(message || 'Failed to send your message. Please try again.');
+      }
+
+      setSubmitted('contact');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
+  }
 
   return (
     <div className="overflow-x-hidden">
@@ -96,7 +141,7 @@ export default function ContactPage() {
                         <p className="text-white/55">Thank you, {cData.name}. We'll reply within 24–48 hours.</p>
                       </div>
                     ) : (
-                      <form onSubmit={async (e)=>{ e.preventDefault(); setFormError(''); if(!cData.location.country){setFormError('Please select your country.');return;} try { await insertContactMessage({name:cData.name,email:cData.email,subject:cData.subject,message:cData.message,country:cData.location.country,city_region:cData.location.city_region}); setSubmitted('contact'); } catch (err) { setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.'); } }} className="space-y-4" noValidate>
+                      <form onSubmit={handleContactSubmit} className="space-y-4" noValidate>
                         <div>
                           <h2 className="font-playfair text-2xl font-bold text-white mb-1">Send a Message</h2>
                           <p className="text-white/55 text-sm">We read every message and respond personally.</p>
@@ -108,8 +153,8 @@ export default function ContactPage() {
                         <input type="text" placeholder="Subject" value={cData.subject} onChange={e=>setCData({...cData,subject:e.target.value})} required aria-label="Subject" className={inputCls} />
                         <textarea placeholder="Your message…" value={cData.message} onChange={e=>setCData({...cData,message:e.target.value})} required rows={5} aria-label="Message" className={taCls} />
                         <LocationFields value={cData.location} onChange={(loc)=>setCData({...cData,location:loc})} />
-                        <button type="submit" className="inline-flex items-center gap-2 px-7 py-3.5 ih-btn-gold">
-                          Send Message <ArrowRight size={15} aria-hidden="true" />
+                        <button type="submit" disabled={isSending} className="inline-flex items-center gap-2 px-7 py-3.5 ih-btn-gold disabled:cursor-not-allowed disabled:opacity-60">
+                          {isSending ? 'Sending…' : 'Send Message'} <ArrowRight size={15} aria-hidden="true" />
                         </button>
                         {formError && <p className="text-red-400 text-xs">{formError}</p>}
                       </form>
