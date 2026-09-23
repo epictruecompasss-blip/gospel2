@@ -96,7 +96,7 @@ export default function ContactPage() {
                         <p className="text-white/55">Thank you, {cData.name}. We'll reply within 24–48 hours.</p>
                       </div>
                     ) : (
-                      <form onSubmit={async (e)=>{ e.preventDefault(); setFormError(''); if(!cData.location.country){setFormError('Please select your country.');return;} try { await insertContactMessage({name:cData.name,email:cData.email,subject:cData.subject,message:cData.message,country:cData.location.country,city_region:cData.location.city_region}); setSubmitted('contact'); } catch { setFormError('Something went wrong. Please try again.'); } }} className="space-y-4" noValidate>
+                      <form onSubmit={async (e)=>{ e.preventDefault(); setFormError(''); if(!cData.location.country){setFormError('Please select your country.');return;} try { await insertContactMessage({name:cData.name,email:cData.email,subject:cData.subject,message:cData.message,country:cData.location.country,city_region:cData.location.city_region}); setSubmitted('contact'); } catch (err) { setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.'); } }} className="space-y-4" noValidate>
                         <div>
                           <h2 className="font-playfair text-2xl font-bold text-white mb-1">Send a Message</h2>
                           <p className="text-white/55 text-sm">We read every message and respond personally.</p>

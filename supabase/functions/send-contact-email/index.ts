@@ -7,24 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const DEFAULT_FROM_EMAIL = "In Him Daily <noreply@inhimdaily.org>";
-const TEAM_EMAIL = "hello@inhimdaily.org";
+const FROM_EMAIL = "In Him Daily <hello@inhimdaily.org>";
+const TEAM_EMAIL = Deno.env.get("CONTACT_RECEIVING_EMAIL") || "hello@inhimdaily.org";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-
-async function getConfig(
-  supabase: ReturnType<typeof createClient>,
-  key: string,
-): Promise<string> {
-  const { data, error } = await supabase
-    .from("app_config")
-    .select("value")
-    .eq("key", key)
-    .maybeSingle();
-  if (error || !data) return "";
-  return data.value as string;
-}
 
 interface RequestBody {
   name: string;
@@ -149,67 +137,58 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY environment variable is not set");
       return new Response(
-        JSON.stringify({ error: "Server not configured." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ error: "Email service is not configured. Please contact us directly at hello@inhimdaily.org." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Save the message to the database first (so it's never lost)
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const { error: dbError } = await supabase.from("contact_messages").insert({
+        name: body.name.trim(),
+        email: body.email.trim(),
+        subject: body.subject.trim(),
+        message: body.message.trim(),
+        country: body.country ?? null,
+        city_region: body.city_region ?? null,
+      });
 
-    // Save the message to the database
-    const { error: dbError } = await supabase.from("contact_messages").insert({
-      name: body.name.trim(),
-      email: body.email.trim(),
-      subject: body.subject.trim(),
-      message: body.message.trim(),
-      country: body.country ?? null,
-      city_region: body.city_region ?? null,
-    });
-
-    if (dbError) {
-      console.error("Database error:", dbError.message);
-      return new Response(
-        JSON.stringify({ error: "Could not save your message. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      if (dbError) {
+        console.error("Database error:", dbError.message);
+      }
     }
 
     // Send notification email to the team via Resend
-    const RESEND_API_KEY = await getConfig(supabase, "RESEND_API_KEY");
-    const FROM_EMAIL = (await getConfig(supabase, "RESEND_FROM_EMAIL")) || DEFAULT_FROM_EMAIL;
+    const resend = new Resend(RESEND_API_KEY);
+    const { error: sendError } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: TEAM_EMAIL,
+      replyTo: body.email.trim(),
+      subject: `Contact Form: ${body.subject.trim()}`,
+      html: buildTeamEmailHtml(body),
+      text: `New contact form submission from ${body.name} (${body.email})\n\nSubject: ${body.subject}\n\nMessage:\n${body.message}\n\nLocation: ${[body.country, body.city_region].filter(Boolean).join(", ") || "Not provided"}`,
+    });
 
-    if (RESEND_API_KEY) {
-      try {
-        const resend = new Resend(RESEND_API_KEY);
-        const { error: sendError } = await resend.emails.send({
-          from: FROM_EMAIL,
-          to: TEAM_EMAIL,
-          replyTo: body.email.trim(),
-          subject: `Contact Form: ${body.subject.trim()}`,
-          html: buildTeamEmailHtml(body),
-          text: `New contact form submission from ${body.name} (${body.email})\n\nSubject: ${body.subject}\n\nMessage:\n${body.message}\n\nLocation: ${[body.country, body.city_region].filter(Boolean).join(", ") || "Not provided"}`,
-        });
-
-        if (sendError) {
-          console.error("Resend SDK error:", sendError);
-        }
-      } catch (emailErr) {
-        console.error("Email send failed:", emailErr);
-      }
-    } else {
-      console.error("RESEND_API_KEY is not configured — message saved, email skipped");
+    if (sendError) {
+      console.error("Resend SDK error:", sendError);
+      return new Response(
+        JSON.stringify({ error: "We couldn't send your message right now. Please try again or email us directly at hello@inhimdaily.org." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: "Your message has been received." }),
+      JSON.stringify({ success: true, message: "Your message has been sent. We'll reply within 24–48 hours." }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("Unexpected error:", err);
     return new Response(
-      JSON.stringify({ error: "Something went wrong. Please try again." }),
+      JSON.stringify({ error: "Something went wrong. Please try again or email us at hello@inhimdaily.org." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
