@@ -701,10 +701,10 @@ export default function AdminPage() {
                     </p>
                     <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
                       <code className="text-xs text-gold-300 font-mono flex-1 overflow-x-auto whitespace-nowrap">
-                        {SUPABASE_URL}/functions/v1/inbound-email
+                        {window.location.origin}/api/resend-webhook
                       </code>
                       <button
-                        onClick={() => navigator.clipboard?.writeText(`${SUPABASE_URL}/functions/v1/inbound-email`)}
+                        onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/api/resend-webhook`)}
                         className="p-2 rounded-lg text-white/40 hover:text-gold-300 hover:bg-white/10 transition-colors shrink-0"
                         aria-label="Copy webhook URL"
                       >
