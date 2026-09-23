@@ -102,8 +102,19 @@ export async function insertContactMessage(data: {
   country?: string;
   city_region?: string;
 }) {
-  const { error } = await getSupabaseClient().from('contact_messages').insert(data);
-  if (error) throw error;
+  const apiUrl = `${SUPABASE_URL}/functions/v1/send-contact-email`;
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify(data),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result.error) {
+    throw new Error(result.error ?? `Request failed (${response.status})`);
+  }
 }
 
 export async function insertDonation(data: {
