@@ -40,11 +40,94 @@ interface RequestBody {
   thread_id?: string;
 }
 
+interface ContactRequestBody {
+  name: string;
+  email: string;
+  message: string;
+  subject?: string;
+  country?: string;
+  city_region?: string;
+}
+
 function json(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function isContactRequest(body: unknown): body is ContactRequestBody {
+  if (!body || typeof body !== 'object') return false;
+  const candidate = body as Record<string, unknown>;
+  return (
+    typeof candidate.name === 'string' &&
+    typeof candidate.email === 'string' &&
+    typeof candidate.message === 'string' &&
+    !('to' in candidate) &&
+    !('html' in candidate)
+  );
+}
+
+async function sendContactEmail(body: ContactRequestBody) {
+  const name = body.name.trim();
+  const email = body.email.trim();
+  const message = body.message.trim();
+  const subject = body.subject?.trim() || 'General enquiry';
+
+  if (!name || !EMAIL_PATTERN.test(email) || !message) {
+    return json({ error: 'A valid name, email address, and message are required.' }, 400);
+  }
+  if (name.length > 120 || email.length > 254 || subject.length > 200 || message.length > 10_000) {
+    return json({ error: 'One or more fields exceed the allowed length.' }, 400);
+  }
+
+  const apiKey = Netlify.env.get('RESEND_API_KEY');
+  if (!apiKey) {
+    return json({ error: 'Email service is not configured.' }, 503);
+  }
+
+  const fromEmail = Netlify.env.get('RESEND_FROM_EMAIL') || DEFAULT_FROM_EMAIL;
+  const teamEmail = Netlify.env.get('CONTACT_RECEIVING_EMAIL') || 'hello@inhimdaily.org';
+  const location = [body.country?.trim(), body.city_region?.trim()].filter(Boolean).join(', ');
+
+  try {
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [teamEmail],
+      replyTo: email,
+      subject: `Contact Form: ${subject}`,
+      html: `
+        <h2>New contact form submission</h2>
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+        ${location ? `<p><strong>Location:</strong> ${escapeHtml(location)}</p>` : ''}
+        <p><strong>Message:</strong></p>
+        <p style="white-space: pre-wrap">${escapeHtml(message)}</p>
+      `,
+      text: `New contact form submission from ${name} (${email})\n\nSubject: ${subject}\n\n${message}${location ? `\n\nLocation: ${location}` : ''}`,
+    });
+
+    if (error) {
+      console.error('Resend rejected the contact message:', error);
+      return json({ error: 'The email service could not send your message.' }, 502);
+    }
+
+    return json({ success: true, id: data?.id ?? null }, 200);
+  } catch (err) {
+    console.error('Unexpected contact email error:', err);
+    return json({ error: 'Could not send your message. Please try again.' }, 500);
+  }
 }
 
 function supabaseConfig() {
@@ -120,6 +203,19 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Method not allowed.' }, 405);
   }
 
+  let rawBody: unknown;
+  try {
+    rawBody = await req.json();
+  } catch {
+    return json({ error: 'Could not read the request body.' }, 400);
+  }
+
+  // Public contact submissions can only send to the fixed team inbox. The
+  // authenticated path below retains support for arbitrary admin recipients.
+  if (isContactRequest(rawBody)) {
+    return sendContactEmail(rawBody);
+  }
+
   const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
   if (!token) {
     return json({ error: 'You must be signed in to send email.' }, 401);
@@ -130,12 +226,7 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Your session has expired. Please sign in again.' }, 401);
   }
 
-  let body: RequestBody;
-  try {
-    body = (await req.json()) as RequestBody;
-  } catch {
-    return json({ error: 'Could not read the request body.' }, 400);
-  }
+  const body = rawBody as RequestBody;
 
   const to = normalizeRecipients(body.to);
   if (to.length === 0) {
@@ -214,5 +305,5 @@ export default async (req: Request, _context: Context) => {
 };
 
 export const config: Config = {
-  path: '/api/send-email',
+  path: ['/api/send-email', '/.netlify/functions/send-email'],
 };
