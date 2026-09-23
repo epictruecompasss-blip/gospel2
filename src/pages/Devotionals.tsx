@@ -5,25 +5,19 @@ import { ArrowRight, BookOpen, Users, Clock, Check, Search, ChevronDown, Calenda
 import ScrollReveal from '@/components/ScrollReveal';
 import { dailyDevotionals, getTodayDevotional, type DailyDevotional } from '@/data/devotionals';
 import { faqCategories, type FAQCategory } from '@/data/faq';
+import { collections } from '@/pages/books/assets';
 
-const series = [
-  {
-    number: 'Series One', title: 'I AM', subtitle: '120 Names of Jesus', days: 120,
-    available: true,
-    img: 'https://images.pexels.com/photos/1111319/pexels-photo-1111319.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: "A transformational journey through 120 names and titles of Jesus Christ. From Alpha to Omega, Bread of Life to King of Kings—each day reveals a new dimension of His character, drawing every generation deeper into the reality of who Jesus truly is.",
-    highlights: ['Rooted in 120 distinct scriptural names','Each name explored across 3 generations','Daily scripture, reflection, prayer, confession','Perfect for individual or family devotion'],
-    audiences: ['Adults: Deep theological reflection','Teens: Real-life application','Children: Engaging stories'],
-  },
-  {
-    number: 'Series Two', title: 'Full of Grace and Truth', subtitle: '120 Gospel Encounters', days: 120,
-    available: false,
-    img: 'https://images.pexels.com/photos/415571/pexels-photo-415571.jpeg?auto=compress&cs=tinysrgb&w=800',
-    description: "Walk through the four Gospels in 120 powerful encounters with Jesus. See Him heal the sick, teach the multitudes, confront religious pride, and rise victorious—through the eyes of every generation.",
-    highlights: ['Chronological Gospel journey','Every encounter in three voices','Character studies and life lessons','A rich, complete picture of Jesus'],
-    audiences: ['Adults: Historical context and depth','Teens: Personal encounter with Jesus',"Children: Jesus as friend and hero"],
-  },
-];
+const series = collections.map((c) => ({
+  number: c.volume,
+  title: c.title,
+  subtitle: c.scripture,
+  days: c.days,
+  available: true,
+  img: c.editions.adult.cover,
+  description: c.description,
+  highlights: ['Christ-centred daily readings', 'Three editions for every age', 'Reflection questions and prayer', 'Daily confession of faith'],
+  audiences: ['Adults: Deep theological reflection', 'Teens: Real-life application', 'Children: Engaging stories'],
+}));
 
 const inside = [
   { n:'01', title:'Key Scripture',       desc:'The foundational verse shared across all three editions for that day.' },
@@ -247,7 +241,7 @@ function FAQSection() {
 export default function DevotionalsPage() {
   useSEO({
     title: 'Daily Devotionals & FAQ | In Him Daily',
-    description: 'Read today\'s devotional, explore the 240-day devotional library, and find answers to common questions about In Him Daily devotionals for adults, teens, and children.',
+    description: 'Read today\'s devotional, explore the six-volume devotional library, and find answers to common questions about In Him Daily devotionals for adults, teens, and children.',
     canonicalPath: '/devotionals',
   });
 
