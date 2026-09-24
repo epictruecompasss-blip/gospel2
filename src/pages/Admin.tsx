@@ -256,7 +256,7 @@ export default function AdminPage() {
       if (fromData?.value) {
         setResendFromEmail(fromData.value);
       } else {
-        setResendFromEmail('In Him Daily <noreply@inhimdaily.org>');
+        setResendFromEmail('In Him Daily <henry@inhimdaily.org>');
       }
     } catch {
       setResendStatus('not_configured');
@@ -290,7 +290,7 @@ export default function AdminPage() {
       }
 
       // Save from email
-      const fromVal = resendFromEmail.trim() || 'In Him Daily <noreply@inhimdaily.org>';
+      const fromVal = resendFromEmail.trim() || 'In Him Daily <henry@inhimdaily.org>';
       const { data: existingFrom } = await supabase
         .from('app_config')
         .select('key')
@@ -644,12 +644,12 @@ export default function AdminPage() {
                       type="text"
                       value={resendFromEmail}
                       onChange={(e) => setResendFromEmail(e.target.value)}
-                      placeholder="In Him Daily <noreply@inhimdaily.org>"
+                      placeholder="In Him Daily <henry@inhimdaily.org>"
                       className="ih-input w-full px-4 py-3 text-sm"
                     />
                   </div>
                   <p className="text-xs text-white/40 mb-4 -mt-2">
-                    Your domain <code className="text-gold-300 bg-gold-400/10 px-1 rounded">inhimdaily.org</code> is verified with Resend. Use <code className="text-gold-300 bg-gold-400/10 px-1 rounded">In Him Daily &lt;noreply@inhimdaily.org&gt;</code> to send emails to any address.
+                    Your domain <code className="text-gold-300 bg-gold-400/10 px-1 rounded">inhimdaily.org</code> is verified with Resend. Use <code className="text-gold-300 bg-gold-400/10 px-1 rounded">In Him Daily &lt;henry@inhimdaily.org&gt;</code> to send emails to any address.
                   </p>
                   <p className="text-xs text-white/40 mb-4">
                     For production, prefer setting <code className="text-gold-300 bg-gold-400/10 px-1 rounded">RESEND_API_KEY</code> and <code className="text-gold-300 bg-gold-400/10 px-1 rounded">RESEND_FROM_EMAIL</code> in Netlify &rarr; Site settings &rarr; Environment variables. Those take priority over the values saved here, and keep the key out of the database.
@@ -684,7 +684,7 @@ export default function AdminPage() {
                       </li>
                       <li className="flex gap-3">
                         <span className="w-5 h-5 rounded-full bg-gold-400/20 text-gold-300 text-[0.7rem] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
-                        <span>Click Save. Emails send from <code className="text-gold-300 bg-gold-400/10 px-1 rounded text-xs">noreply@inhimdaily.org</code> and can reach any address.</span>
+                        <span>Click Save. Emails send from <code className="text-gold-300 bg-gold-400/10 px-1 rounded text-xs">henry@inhimdaily.org</code> and can reach any address.</span>
                       </li>
                       <li className="flex gap-3">
                         <span className="w-5 h-5 rounded-full bg-gold-400/20 text-gold-300 text-[0.7rem] font-bold flex items-center justify-center shrink-0 mt-0.5">5</span>

@@ -13,7 +13,7 @@ import { Resend } from 'resend';
  * the app_config table from the admin dashboard's Email Settings tab.
  */
 
-const DEFAULT_FROM_EMAIL = 'In Him Daily <noreply@inhimdaily.org>';
+const DEFAULT_FROM_EMAIL = 'In Him Daily <henry@inhimdaily.org>';
 
 // Public project values — also present in src/lib/supabase.ts.
 const FALLBACK_SUPABASE_URL = 'https://iupspzfbhxfikxjleizd.supabase.co';
