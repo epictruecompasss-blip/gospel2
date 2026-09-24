@@ -236,7 +236,8 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Subject and message body are required.' }, 400);
   }
 
-  const apiKey = Netlify.env.get('RESEND_API_KEY') ?? (await getConfigValue('RESEND_API_KEY', token));
+  const configuredApiKey = await getConfigValue('RESEND_API_KEY', token);
+  const apiKey = configuredApiKey || Netlify.env.get('RESEND_API_KEY')?.trim() || '';
   if (!apiKey) {
     return json(
       {
