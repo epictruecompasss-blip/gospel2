@@ -90,7 +90,7 @@ async function sendContactEmail(body: ContactRequestBody) {
     return json({ error: 'One or more fields exceed the allowed length.' }, 400);
   }
 
-  const apiKey = Netlify.env.get('RESEND_API_KEY');
+  const apiKey = Netlify.env.get('RESEND_API_KEY')?.trim();
   if (!apiKey) {
     return json({ error: 'Email service is not configured.' }, 503);
   }
@@ -236,8 +236,10 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Subject and message body are required.' }, 400);
   }
 
-  const configuredApiKey = await getConfigValue('RESEND_API_KEY', token);
-  const apiKey = configuredApiKey || Netlify.env.get('RESEND_API_KEY')?.trim() || '';
+  // The deploy-time secret is the source of truth. A legacy dashboard value is
+  // only a fallback so an old saved key cannot override a rotated Netlify key.
+  const environmentApiKey = Netlify.env.get('RESEND_API_KEY')?.trim() || '';
+  const apiKey = environmentApiKey || (await getConfigValue('RESEND_API_KEY', token));
   if (!apiKey) {
     return json(
       {
@@ -280,7 +282,10 @@ export default async (req: Request, _context: Context) => {
 
     if (error) {
       console.error('Resend rejected the message:', error);
-      return json({ error: error.message ?? 'The email service returned an error.' }, 502);
+      return json(
+        { error: 'The email service could not send this message. Please check the email service configuration.' },
+        502,
+      );
     }
 
     await logOutboundEmail(token, {
