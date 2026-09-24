@@ -56,6 +56,37 @@ function json(body: unknown, status: number) {
   });
 }
 
+type ResendError = {
+  message?: string;
+  name?: string;
+  statusCode?: number;
+};
+
+/** Turns Resend's rejection into useful guidance without exposing credentials. */
+function resendErrorMessage(error: ResendError): string {
+  const detail = error.message?.trim() || '';
+  const normalized = `${error.name ?? ''} ${detail}`.toLowerCase();
+
+  if (error.statusCode === 401 || normalized.includes('api key')) {
+    return 'Resend rejected the API key. Update RESEND_API_KEY in Netlify or Email Settings.';
+  }
+  if (normalized.includes('domain') || normalized.includes('verify') || normalized.includes('from')) {
+    return detail
+      ? `Resend rejected the sender address: ${detail}`
+      : 'Resend rejected the sender address. Verify its domain and update the From address in Email Settings.';
+  }
+  if (error.statusCode === 429 || normalized.includes('rate limit')) {
+    return 'Resend rate-limited this message. Wait briefly and try again.';
+  }
+  if (normalized.includes('attachment')) {
+    return detail ? `Resend rejected an attachment: ${detail}` : 'Resend rejected an attachment.';
+  }
+
+  return detail
+    ? `Resend could not send this message: ${detail}`
+    : 'Resend could not send this message. Check the API key and verified sender domain.';
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -281,11 +312,14 @@ export default async (req: Request, _context: Context) => {
     });
 
     if (error) {
-      console.error('Resend rejected the message:', error);
-      return json(
-        { error: 'The email service could not send this message. Please check the email service configuration.' },
-        502,
-      );
+      // Avoid logging the full provider response: concise metadata is enough
+      // for diagnostics and cannot accidentally include request credentials.
+      console.error('Resend rejected the message.', {
+        name: error.name,
+        statusCode: error.statusCode,
+        message: error.message,
+      });
+      return json({ error: resendErrorMessage(error) }, 502);
     }
 
     await logOutboundEmail(token, {
