@@ -70,11 +70,11 @@ export const collections: Collection[] = [
     scripture: 'Discovering Who Jesus Is',
     days: 120,
     description: 'A 120-day journey through the names and titles of Jesus — from the Bread of Life to the King of Kings — revealing who He is and what that means for your daily life.',
-    cover: '/images/books/webp/he_was_always_the_answer(adult_edition).webp',
+    cover: '/images/books/he_was_always_the_answer(adult_version).png',
     editions: {
-      kids: { cover: '/images/books/webp/he_was_always_the_answer(kids_edition).webp', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/webp/he_was_always_the_answer(teen_edition).webp', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/webp/he_was_always_the_answer(adult_edition).webp', usd: '$12', kes: 'KES 1,600' },
+      kids: { cover: '/images/books/he_was_always_the_answer(kids_version).png', usd: '$8', kes: 'KES 1,080' },
+      teen: { cover: '/images/books/he_was_always_the_answer(teen_version).png', usd: '$10', kes: 'KES 1,350' },
+      adult: { cover: '/images/books/he_was_always_the_answer(adult_version).png', usd: '$12', kes: 'KES 1,600' },
     },
   },
   {
@@ -87,7 +87,7 @@ export const collections: Collection[] = [
     cover: '/images/books/everywhere_i_look_its_him(adult_version) copy 2.webp',
     editions: {
       kids: { cover: '/images/books/everywhere_i_look_its_him(kids_version) copy 2.webp', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/webp/everywhere_i_look_its_him(teen_edition).webp', usd: '$10', kes: 'KES 1,350' },
+      teen: { cover: '/images/books/everywhere_i_look_its_him(teen_version).webp', usd: '$10', kes: 'KES 1,350' },
       adult: { cover: '/images/books/everywhere_i_look_its_him(adult_version) copy 2.webp', usd: '$12', kes: 'KES 1,600' },
     },
   },
