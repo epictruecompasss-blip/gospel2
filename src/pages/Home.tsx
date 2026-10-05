@@ -67,7 +67,7 @@ const editions = [
 const stats = [
   { number: '5,000+', label: 'Believers Growing Daily', sub: 'Across all communities' },
   { number: '12+',    label: 'Countries Reached',         sub: 'And expanding' },
-  { number: '600+',  label: 'Days of Devotionals',      sub: 'Six complete volumes' },
+  { number: '290+',   label: 'Days of Devotionals',      sub: 'Three series available' },
   { number: '3',      label: 'Generations Reading',      sub: 'Adults, teens, children' },
 ];
 
@@ -287,7 +287,7 @@ export default function HomePage() {
           <ScrollReveal className="text-center mb-14">
             <p className="ih-eyebrow mb-3">Latest Devotionals</p>
             <h2 id="latest-heading" className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">Recent Encounters with Jesus</h2>
-            <p className="text-white/55 text-lg max-w-xl mx-auto">Fresh devotional content from our six-volume Christ-centred library.</p>
+            <p className="text-white/55 text-lg max-w-xl mx-auto">Fresh devotional content from our Christ-centred devotional library.</p>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 gap-6">
             {latestDevotionals.map((d, i) => (
@@ -516,15 +516,15 @@ export default function HomePage() {
             <p className="text-white/55 text-lg max-w-xl mx-auto">Premium series crafted to take your family deeper into Jesus—one scripture at a time.</p>
           </ScrollReveal>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {collections.slice(0, 3).map((s,i)=>(
+            {collections.map((s,i)=>(
               <ScrollReveal key={i} delay={i*120}>
                 <div className="premium-card rounded-2xl overflow-hidden ih-card">
                   <div className="relative h-48 overflow-hidden bg-white/5">
                     <img src={s.cover} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-contain transition-transform duration-500 hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#05070D]/80 to-transparent" aria-hidden="true" />
                     <div className="absolute bottom-4 left-4">
-                      <span className="px-3 py-1 rounded-full text-[0.72rem] font-bold bg-gold-500 text-[#05070D]">
-                        Available Now
+                      <span className={`px-3 py-1 rounded-full text-[0.72rem] font-bold ${s.id === 'series-3' ? 'bg-white/15 text-white backdrop-blur' : 'bg-gold-500 text-[#05070D]'}`}>
+                        {s.id === 'series-3' ? 'Coming Soon' : 'Available Now'}
                       </span>
                     </div>
                   </div>

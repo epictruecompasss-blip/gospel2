@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, HandHeart, Check, Globe, Shield, Mail } from 'lucide-react';
+import { Heart, HandHeart, Check, Globe, Shield, Mail, Sparkles, Users, BookOpen, MessageCircle } from 'lucide-react';
 import { useSEO } from '@/hooks/useSEO';
 import ScrollReveal from '@/components/ScrollReveal';
 import LocationFields, { type LocationData } from '@/components/LocationFields';
@@ -12,6 +12,24 @@ const paymentMethods = [
   { label: 'M-Pesa', desc: 'Safaricom M-Pesa (Kenya)', icon: 'phone' },
   { label: 'Bank Transfer', desc: 'Direct bank transfer — details emailed to you', icon: 'bank' },
   { label: 'PayPal', desc: 'Pay with your PayPal balance or linked card', icon: 'paypal' },
+];
+
+const impactAreas = [
+  {
+    icon: BookOpen,
+    title: 'Create Devotionals',
+    desc: 'Fund the writing, design, and production of new devotional series for all three generations.',
+  },
+  {
+    icon: Users,
+    title: 'Reach More Families',
+    desc: 'Help distribute free samples and build WhatsApp communities across the globe.',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Support the Ministry',
+    desc: 'Sustain the ongoing work of Epic True North in Nairobi and beyond.',
+  },
 ];
 
 export default function DonatePage() {
@@ -85,7 +103,7 @@ export default function DonatePage() {
           </div>
           <p className="text-gold-400 text-[0.72rem] font-semibold tracking-[0.16em] uppercase mb-4">Partner With Us</p>
           <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            Support the Mission
+            Give to the Mission
           </h1>
           <p className="text-white/65 text-xl max-w-2xl mx-auto leading-relaxed mb-6">
             Your generosity helps share Jesus with families across generations around the world.
@@ -94,26 +112,38 @@ export default function DonatePage() {
             In Him Daily is a ministry of Epic True North, based in Nairobi, Kenya. Every gift — large or small — helps us
             create Christ-centred devotionals, distribute free samples, and build communities where families encounter Jesus together.
           </p>
+          <div className="mt-10">
+            <a
+              href="#donate-form"
+              onClick={e => { e.preventDefault(); document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className="inline-flex items-center justify-center gap-2 px-10 py-4 ih-btn-gold text-base font-bold rounded-full shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <Heart size={18} aria-hidden="true" />
+              Give Now
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* How Your Gift Helps */}
-      <section className="py-16 ih-section" aria-label="How your gift helps">
+      {/* Ministry Purpose */}
+      <section className="py-16 ih-section" aria-label="Ministry purpose">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal className="text-center mb-10">
-            <p className="ih-eyebrow mb-3">Your Impact</p>
-            <h2 className="font-playfair text-2xl md:text-3xl font-bold text-white mb-4">How Your Gift Helps</h2>
+            <p className="ih-eyebrow mb-3">Why We Give</p>
+            <h2 className="font-playfair text-2xl md:text-3xl font-bold text-white mb-4">The Ministry of In Him Daily</h2>
+            <p className="text-white/55 text-lg max-w-3xl mx-auto leading-relaxed">
+              In Him Daily exists to bring three generations — adults, teens, and children — face to face with Jesus Christ
+              every single day. We believe the family is the primary place of discipleship, and our devotionals are designed
+              to be read together, discussed together, and lived out together. Your partnership makes this possible.
+            </p>
           </ScrollReveal>
+
           <div className="grid sm:grid-cols-3 gap-5">
-            {[
-              { title: 'Create Devotionals', desc: 'Fund the writing, design, and production of new volumes across all six collections.' },
-              { title: 'Reach More Families', desc: 'Help distribute free samples and build WhatsApp communities across the globe.' },
-              { title: 'Support the Ministry', desc: 'Sustain the ongoing work of Epic True North in Nairobi and beyond.' },
-            ].map((item, i) => (
+            {impactAreas.map((item, i) => (
               <ScrollReveal key={i} delay={i * 80}>
                 <div className="p-6 rounded-2xl ih-card h-full">
                   <div className="w-10 h-10 rounded-full bg-gold-400/15 border border-gold-400/25 flex items-center justify-center mb-4">
-                    <Heart size={18} className="text-gold-300" aria-hidden="true" />
+                    <item.icon size={18} className="text-gold-300" aria-hidden="true" />
                   </div>
                   <h3 className="font-playfair text-lg font-bold text-white mb-2">{item.title}</h3>
                   <p className="text-white/55 text-sm leading-relaxed">{item.desc}</p>
@@ -124,8 +154,68 @@ export default function DonatePage() {
         </div>
       </section>
 
+      {/* Partnership Section */}
+      <section className="py-16 ih-section" aria-label="Partnership">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="rounded-2xl ih-card p-8 md:p-10 relative overflow-hidden">
+              <div className="absolute inset-0 pointer-events-none" aria-hidden="true"
+                style={{ background: 'radial-gradient(ellipse 50% 40% at 50% 100%, rgba(201,152,58,0.08) 0%, transparent 70%)' }} />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-gold-400/15 border border-gold-400/25 flex items-center justify-center">
+                    <Sparkles size={22} className="text-gold-300" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-gold-400 text-[0.72rem] font-semibold tracking-[0.16em] uppercase">Partnership</p>
+                    <h2 className="font-playfair text-2xl md:text-3xl font-bold text-white">Become a Partner</h2>
+                  </div>
+                </div>
+
+                <p className="text-white/65 text-base leading-relaxed mb-5">
+                  Partnership with In Him Daily is a personal commitment of prayer and finances as you are directed by the Lord.
+                  It is not a monthly financial obligation. You give as you are able, when you are able, and we steward every gift
+                  with integrity and transparency.
+                </p>
+
+                <p className="text-white/55 text-sm leading-relaxed mb-6">
+                  As a partner, you become part of what God is doing through this ministry — creating Christ-centred devotionals,
+                  building safe communities, and reaching families across the world. Whether you give once or regularly, pray for us
+                  daily, or share the ministry with others, your partnership matters.
+                </p>
+
+                <div className="p-5 rounded-xl bg-gold-400/8 border border-gold-400/20">
+                  <p className="text-gold-200 text-sm italic leading-relaxed text-center">
+                    &ldquo;Partnership is a personal commitment of prayer and finances as you are directed by the Lord.
+                    It is not a monthly financial obligation.&rdquo;
+                  </p>
+                </div>
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href="#donate-form"
+                    onClick={e => { e.preventDefault(); document.getElementById('donate-form')?.scrollIntoView({ behavior: 'smooth' }); }}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 ih-btn-gold text-sm font-bold rounded-full"
+                  >
+                    <Heart size={15} aria-hidden="true" />
+                    Give to the Mission
+                  </a>
+                  <a
+                    href="/prayer-partners"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 ih-btn-ghost text-sm font-semibold rounded-full"
+                  >
+                    <HandHeart size={15} aria-hidden="true" />
+                    Become a Prayer Partner
+                  </a>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
       {/* Donation Form / Thank You */}
-      <section className="py-20 ih-section" aria-label="Donation form">
+      <section id="donate-form" className="py-20 ih-section" aria-label="Donation form">
         <div className="max-w-xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
             {submitted ? (
@@ -252,10 +342,10 @@ export default function DonatePage() {
                   />
                 </div>
 
-                <button type="submit" className="w-full py-4 ih-btn-gold text-[0.9rem]">
+                <button type="submit" className="w-full py-4.5 ih-btn-gold text-[0.95rem] font-bold rounded-xl shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                   <span className="inline-flex items-center gap-2 justify-center">
-                    <Heart size={16} aria-hidden="true" />
-                    {amount ? `Donate $${amount}` : 'Donate Now'}
+                    <Heart size={18} aria-hidden="true" />
+                    {amount ? `Give $${amount}` : 'Give Now'}
                   </span>
                 </button>
                 {formError && <p className="text-red-400 text-xs text-center">{formError}</p>}

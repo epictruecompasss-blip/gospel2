@@ -20,7 +20,7 @@ export const heroBooks: BookCover[] = [
     subtitle: 'Ages 6–12',
     age: 'Kids',
     accent: '#F59E0B',
-    cover: '/images/books/he_was_always_the_answer(kids_version).png',
+    cover: '/images/books/every_offering_pointed_to_him(kids_version) copy 2.webp',
   },
   {
     id: 'teen',
@@ -28,7 +28,7 @@ export const heroBooks: BookCover[] = [
     subtitle: 'Ages 13–18',
     age: 'Teen',
     accent: '#3B82F6',
-    cover: '/images/books/he_was_always_the_answer(teen_version).png',
+    cover: '/images/books/every_offering_pointed_to_him(teen_version) copy 2.webp',
   },
   {
     id: 'adult',
@@ -36,7 +36,7 @@ export const heroBooks: BookCover[] = [
     subtitle: 'Ages 19+',
     age: 'Adult',
     accent: '#D4AF37',
-    cover: '/images/books/he_was_always_the_answer(adult_version).png',
+    cover: '/images/books/every_offering_pointed_to_him(adult_version) copy 2.webp',
   },
 ];
 
@@ -64,87 +64,45 @@ export interface Collection {
 
 export const collections: Collection[] = [
   {
-    id: 'vol-one',
-    volume: 'Volume One',
-    title: 'He Was Always the Answer',
-    scripture: 'Meeting Jesus throughout Scripture',
+    id: 'series-1',
+    volume: 'Series 1',
+    title: 'I AM — 120 Names of Jesus',
+    scripture: 'Discovering Who Jesus Is',
     days: 120,
-    description: 'A 120-day journey tracing the promise of a Saviour from Genesis to Revelation, revealing Christ on every page.',
-    cover: '/images/books/he_was_always_the_answer(adult_version).png',
+    description: 'A 120-day journey through the names and titles of Jesus — from the Bread of Life to the King of Kings — revealing who He is and what that means for your daily life.',
+    cover: '/images/books/webp/he_was_always_the_answer(adult_edition).webp',
     editions: {
-      kids: { cover: '/images/books/he_was_always_the_answer(kids_version).png', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/he_was_always_the_answer(teen_version).png', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/he_was_always_the_answer(adult_version).png', usd: '$12', kes: 'KES 1,600' },
+      kids: { cover: '/images/books/webp/he_was_always_the_answer(kids_edition).webp', usd: '$8', kes: 'KES 1,080' },
+      teen: { cover: '/images/books/webp/he_was_always_the_answer(teen_edition).webp', usd: '$10', kes: 'KES 1,350' },
+      adult: { cover: '/images/books/webp/he_was_always_the_answer(adult_edition).webp', usd: '$12', kes: 'KES 1,600' },
     },
   },
   {
-    id: 'torah-1',
-    volume: 'Torah Volume One',
-    title: 'In the Beginning, He Was There',
-    scripture: 'Genesis & Exodus',
-    days: 100,
-    description: 'Walk through the foundations of Scripture and see the Lamb slain before the foundation of the world.',
-    cover: '/images/books/in_the_begining_he_was_there(adult_version) copy 2.png',
-    editions: {
-      kids: { cover: '/images/books/in_the_begining_he_was_there(kids_version) copy 2.png', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/in_the_begining_he_was_there(teen_version) copy 2.png', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/in_the_begining_he_was_there(adult_version) copy 2.png', usd: '$12', kes: 'KES 1,600' },
-    },
-  },
-  {
-    id: 'torah-2',
-    volume: 'Torah Volume Two',
-    title: 'Every Offering Pointed to Him',
-    scripture: 'Leviticus & Numbers',
-    days: 67,
-    description: 'Discover how every sacrifice, feast, and tent peg in the wilderness pointed to the coming Saviour.',
-    cover: '/images/books/every_offering_pointed_to_him(adult_version).png',
-    editions: {
-      kids: { cover: '/images/books/every_offering_pointed_to_him(kids_version).png', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/every_offering_pointed_to_him(teen_version).png', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/every_offering_pointed_to_him(adult_version).png', usd: '$12', kes: 'KES 1,600' },
-    },
-  },
-  {
-    id: 'psalms',
-    volume: 'Psalms',
-    title: 'He Sang About Himself',
-    scripture: 'The Songbook of the King',
-    days: 82,
-    description: 'Hear the voice of the Shepherd-King in every psalm, from the cross-shaped cries of David to the praises of Zion.',
-    cover: '/images/books/he_sang_about_himself(adult_version).png',
-    editions: {
-      kids: { cover: '/images/books/he_sang_about_himself_(kids_version).png', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/he_sang_about_himself(teen_version).png', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/he_sang_about_himself(adult_version).png', usd: '$12', kes: 'KES 1,600' },
-    },
-  },
-  {
-    id: 'nt',
-    volume: 'New Testament',
-    title: 'Everywhere I Look, It\'s Him',
-    scripture: 'The Gospels & Beyond',
+    id: 'series-2',
+    volume: 'Series 2',
+    title: 'Full of Grace and Truth — 120 Gospel Encounters',
+    scripture: 'Meeting Jesus in the Gospels',
     days: 120,
-    description: 'See how the Old Testament promises burst into living colour the moment the Word becomes flesh.',
-    cover: '/images/books/everywhere_i_look_its_him(adult_version).png',
+    description: 'A 120-day journey through 120 life-changing encounters with Jesus in the Gospels — each one a fresh meeting with the One who is full of grace and truth.',
+    cover: '/images/books/everywhere_i_look_its_him(adult_version) copy 2.webp',
     editions: {
-      kids: { cover: '/images/books/everywhere_i_look_its_him(kids_version).png', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/everywhere_i_look_its_him(teen_version).png', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/everywhere_i_look_its_him(adult_version).png', usd: '$12', kes: 'KES 1,600' },
+      kids: { cover: '/images/books/everywhere_i_look_its_him(kids_version) copy 2.webp', usd: '$8', kes: 'KES 1,080' },
+      teen: { cover: '/images/books/webp/everywhere_i_look_its_him(teen_edition).webp', usd: '$10', kes: 'KES 1,350' },
+      adult: { cover: '/images/books/everywhere_i_look_its_him(adult_version) copy 2.webp', usd: '$12', kes: 'KES 1,600' },
     },
   },
   {
-    id: 'deut',
-    volume: 'Deuteronomy',
-    title: 'He Spoke Before He Came',
-    scripture: 'The Prophet Like Moses',
-    days: 120,
-    description: 'Listen to the sermons of Moses and hear the heartbeat of the Prophet who would one day stand on the mountain.',
-    cover: '/images/books/he_spoke_before_he_came(adult_version) copy 2.png',
+    id: 'series-3',
+    volume: 'Series 3 — Coming Soon',
+    title: 'He Entered Before He Came — 50 Days in Joshua',
+    scripture: 'The Captain of the Lord\'s Army',
+    days: 50,
+    description: 'A 50-day journey through the book of Joshua, revealing the Captain who entered the story long before He walked the roads of Galilee.',
+    cover: '/images/books/every_offering_pointed_to_him(adult_version) copy 2.webp',
     editions: {
-      kids: { cover: '/images/books/he_spoke_before_he_came(kids_version) copy 2.png', usd: '$8', kes: 'KES 1,080' },
-      teen: { cover: '/images/books/he_spoke_before_he_came(teen_version) copy 2.png', usd: '$10', kes: 'KES 1,350' },
-      adult: { cover: '/images/books/he_spoke_before_he_came(adult_version) copy 2.png', usd: '$12', kes: 'KES 1,600' },
+      kids: { cover: '/images/books/every_offering_pointed_to_him(kids_version) copy 2.webp', usd: '$8', kes: 'KES 1,080' },
+      teen: { cover: '/images/books/every_offering_pointed_to_him(teen_version) copy 2.webp', usd: '$10', kes: 'KES 1,350' },
+      adult: { cover: '/images/books/every_offering_pointed_to_him(adult_version) copy 2.webp', usd: '$12', kes: 'KES 1,600' },
     },
   },
 ];
@@ -163,21 +121,21 @@ export const ageCards: AgeCard[] = [
     age: 'Kids',
     range: 'Age 6–12',
     features: ['Bright illustrations', 'Simple explanations', 'Fun activities', 'Family discussion'],
-    cover: '/images/books/he_was_always_the_answer(kids_version).png',
+    cover: '/images/books/every_offering_pointed_to_him(kids_version) copy 2.webp',
   },
   {
     id: 'teen-card',
     age: 'Teen',
     range: 'Age 13–18',
     features: ['Faith in today\'s world', 'Reflection', 'Questions', 'Life application'],
-    cover: '/images/books/he_was_always_the_answer(teen_version).png',
+    cover: '/images/books/every_offering_pointed_to_him(teen_version) copy 2.webp',
   },
   {
     id: 'adult-card',
     age: 'Adult',
     range: 'Age 19+',
     features: ['Rich theology', 'Prayer', 'Daily transformation', 'Church study'],
-    cover: '/images/books/he_was_always_the_answer(adult_version).png',
+    cover: '/images/books/every_offering_pointed_to_him(adult_version) copy 2.webp',
   },
 ];
 
@@ -211,8 +169,7 @@ export const features: Feature[] = [
 ];
 
 export const timeline: string[] = [
-  'Genesis', 'Exodus', 'Leviticus', 'Numbers',
-  'Deuteronomy', 'Psalms', 'New Testament',
+  'Series 1: I AM', 'Series 2: Grace & Truth', 'Series 3: Joshua',
 ];
 
 export const checklist: string[] = [

@@ -121,25 +121,7 @@ async function sendContactEmail(body: ContactRequestBody) {
     return json({ error: 'One or more fields exceed the allowed length.' }, 400);
   }
 
-  // Try the env var key first, then fall back to the database value.
-  const envApiKey = Netlify.env.get('RESEND_API_KEY')?.trim() || '';
-  let dbApiKey = '';
-  if (!envApiKey) {
-    const { url, serviceKey } = supabaseConfig();
-    if (url && serviceKey) {
-      try {
-        const resp = await fetch(
-          `${url}/rest/v1/app_config?select=value&key=eq.RESEND_API_KEY&limit=1`,
-          { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
-        );
-        if (resp.ok) {
-          const rows = (await resp.json()) as { value?: string }[];
-          dbApiKey = rows?.[0]?.value?.trim() ?? '';
-        }
-      } catch { /* ignore */ }
-    }
-  }
-  const apiKey = envApiKey || dbApiKey;
+  const apiKey = Netlify.env.get('RESEND_API_KEY')?.trim();
   if (!apiKey) {
     return json({ error: 'Email service is not configured.' }, 503);
   }
@@ -186,7 +168,6 @@ function supabaseConfig() {
       Netlify.env.get('SUPABASE_ANON_KEY') ??
       Netlify.env.get('VITE_SUPABASE_ANON_KEY') ??
       FALLBACK_SUPABASE_ANON_KEY,
-    serviceKey: Netlify.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
   };
 }
 
@@ -286,11 +267,11 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Subject and message body are required.' }, 400);
   }
 
-  // Collect all possible API keys — env var first, then the database value.
+  // The deploy-time secret is the source of truth. A legacy dashboard value is
+  // only a fallback so an old saved key cannot override a rotated Netlify key.
   const environmentApiKey = Netlify.env.get('RESEND_API_KEY')?.trim() || '';
-  const dbApiKey = await getConfigValue('RESEND_API_KEY', token);
-  const apiKeys = [environmentApiKey, dbApiKey].filter((k, i, arr) => k && arr.indexOf(k) === i);
-  if (apiKeys.length === 0) {
+  const apiKey = environmentApiKey || (await getConfigValue('RESEND_API_KEY', token));
+  if (!apiKey) {
     return json(
       {
         error:
@@ -309,70 +290,58 @@ export default async (req: Request, _context: Context) => {
   const bcc = normalizeRecipients(body.bcc);
   const replyTo = normalizeRecipients(body.replyTo);
 
-  const emailParams = {
-    from: fromEmail,
-    to,
-    subject: body.subject.trim(),
-    html: body.html,
-    ...(body.text ? { text: body.text } : {}),
-    ...(cc.length > 0 ? { cc } : {}),
-    ...(bcc.length > 0 ? { bcc } : {}),
-    ...(replyTo.length > 0 ? { replyTo } : {}),
-    ...(body.attachments?.length
-      ? {
-          attachments: body.attachments.map((attachment) => ({
-            filename: attachment.filename,
-            path: attachment.url,
-          })),
-        }
-      : {}),
-  };
+  try {
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject: body.subject.trim(),
+      html: body.html,
+      ...(body.text ? { text: body.text } : {}),
+      ...(cc.length > 0 ? { cc } : {}),
+      ...(bcc.length > 0 ? { bcc } : {}),
+      ...(replyTo.length > 0 ? { replyTo } : {}),
+      ...(body.attachments?.length
+        ? {
+            attachments: body.attachments.map((attachment) => ({
+              filename: attachment.filename,
+              path: attachment.url,
+            })),
+          }
+        : {}),
+    });
 
-  // Try each candidate key; stop at the first one Resend accepts.
-  let lastError: ResendError | null = null;
-  for (const candidateKey of apiKeys) {
-    try {
-      const resend = new Resend(candidateKey);
-      const { data, error } = await resend.emails.send(emailParams);
-
-      if (!error) {
-        await logOutboundEmail(token, {
-          direction: 'outbound',
-          from_email: fromEmail,
-          from_name: 'In Him Daily',
-          to_email: to.join(', '),
-          subject: body.subject.trim(),
-          body_text: body.text ?? null,
-          body_html: body.html,
-          attachments: body.attachments ?? [],
-          status: 'sent',
-          in_reply_to: body.in_reply_to ?? null,
-          thread_id: body.thread_id ?? crypto.randomUUID(),
-          source: 'admin_compose',
-        });
-
-        return json({ success: true, id: data?.id ?? null, message: 'Email sent successfully.' }, 200);
-      }
-
-      lastError = error as ResendError;
-      console.error('Resend rejected the message with a candidate key.', {
+    if (error) {
+      // Avoid logging the full provider response: concise metadata is enough
+      // for diagnostics and cannot accidentally include request credentials.
+      console.error('Resend rejected the message.', {
         name: error.name,
         statusCode: error.statusCode,
         message: error.message,
       });
-
-      // If it's an auth/key error, try the next key; otherwise stop.
-      const isAuthError =
-        error.statusCode === 401 ||
-        `${error.name ?? ''} ${error.message ?? ''}`.toLowerCase().includes('api key');
-      if (!isAuthError) break;
-    } catch (err) {
-      console.error('Unexpected error while sending email:', err);
-      return json({ error: 'Could not send the email. Please try again.' }, 500);
+      return json({ error: resendErrorMessage(error) }, 502);
     }
-  }
 
-  return json({ error: resendErrorMessage(lastError ?? {}) }, 502);
+    await logOutboundEmail(token, {
+      direction: 'outbound',
+      from_email: fromEmail,
+      from_name: 'In Him Daily',
+      to_email: to.join(', '),
+      subject: body.subject.trim(),
+      body_text: body.text ?? null,
+      body_html: body.html,
+      attachments: body.attachments ?? [],
+      status: 'sent',
+      in_reply_to: body.in_reply_to ?? null,
+      thread_id: body.thread_id ?? crypto.randomUUID(),
+      source: 'admin_compose',
+    });
+
+    return json({ success: true, id: data?.id ?? null, message: 'Email sent successfully.' }, 200);
+  } catch (err) {
+    console.error('Unexpected error while sending email:', err);
+    return json({ error: 'Could not send the email. Please try again.' }, 500);
+  }
 };
 
 export const config: Config = {

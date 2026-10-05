@@ -12,7 +12,7 @@ const series = collections.map((c) => ({
   title: c.title,
   subtitle: c.scripture,
   days: c.days,
-  available: true,
+  available: c.id !== 'series-3',
   img: c.editions.adult.cover,
   description: c.description,
   highlights: ['Christ-centred daily readings', 'Three editions for every age', 'Reflection questions and prayer', 'Daily confession of faith'],
@@ -241,7 +241,7 @@ function FAQSection() {
 export default function DevotionalsPage() {
   useSEO({
     title: 'Daily Devotionals & FAQ | In Him Daily',
-    description: 'Read today\'s devotional, explore the six-volume devotional library, and find answers to common questions about In Him Daily devotionals for adults, teens, and children.',
+    description: 'Read today\'s devotional, explore the devotional library, and find answers to common questions about In Him Daily devotionals for adults, teens, and children.',
     canonicalPath: '/devotionals',
   });
 
@@ -266,24 +266,25 @@ export default function DevotionalsPage() {
       {/* Daily Devotional */}
       <DailyDevotionalSection />
 
-      {/* 240 Days timeline */}
-      <section className="py-10 ih-section border-y border-white/10" aria-label="240 Days of Encountering Jesus">
+      {/* 290 Days timeline */}
+      <section className="py-10 ih-section border-y border-white/10" aria-label="290 Days of Encountering Jesus">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-6">
-            <h2 className="font-playfair text-2xl font-bold text-white">240 Days of Encountering Jesus</h2>
+            <h2 className="font-playfair text-2xl font-bold text-white">290 Days of Encountering Jesus</h2>
           </ScrollReveal>
           <div className="flex items-center justify-center gap-3 flex-wrap">
             {[
-              {day:'Day 1',  name:'The Word',       ref:'John 1:1',   s1:true},
-              {day:'Day 30', name:'Bread of Life',  ref:'John 6:35',  s1:true},
-              {day:'Day 60', name:'Good Shepherd',  ref:'John 10:11', s1:true},
-              {day:'Day 120',name:'King of Kings',  ref:'Rev 19:16',  s1:true},
-              {day:'Day 121',name:'Grace & Truth',  ref:'John 1:14',  s1:false},
-              {day:'Day 240',name:'It Is Finished', ref:'John 19:30', s1:false},
+              {day:'Day 1',   name:'The Word',        ref:'John 1:1',   s1:true},
+              {day:'Day 30',  name:'Bread of Life',   ref:'John 6:35',  s1:true},
+              {day:'Day 60',  name:'Good Shepherd',   ref:'John 10:11', s1:true},
+              {day:'Day 120', name:'King of Kings',   ref:'Rev 19:16',  s1:true},
+              {day:'Day 121', name:'Grace & Truth',   ref:'John 1:14',  s1:false},
+              {day:'Day 240', name:'It Is Finished',  ref:'John 19:30', s1:false},
+              {day:'Day 290', name:'Captain of Hosts',ref:'Josh 5:14',  s3:false},
             ].map((item,i,arr)=>(
               <div key={i} className="flex items-center gap-3">
                 <div className="text-center">
-                  <div className={`w-2.5 h-2.5 rounded-full mx-auto mb-1.5 ${item.s1 ? 'bg-gold-400' : 'bg-navy-400'}`} />
+                  <div className={`w-2.5 h-2.5 rounded-full mx-auto mb-1.5 ${item.s1 ? 'bg-gold-400' : item.s3 ? 'bg-blue-400' : 'bg-gold-300'}`} />
                   <p className="text-[0.72rem] font-bold text-white">{item.day}</p>
                   <p className="text-[0.68rem] text-white/50 max-w-[72px] leading-tight">{item.name}</p>
                   <p className="text-[0.65rem] text-gold-400">{item.ref}</p>
@@ -293,8 +294,9 @@ export default function DevotionalsPage() {
             ))}
           </div>
           <div className="flex justify-center gap-6 mt-5">
-            <div className="flex items-center gap-2 text-xs text-white/55"><div className="w-2.5 h-2.5 rounded-full bg-gold-400" aria-hidden="true" /> Series One</div>
-            <div className="flex items-center gap-2 text-xs text-white/55"><div className="w-2.5 h-2.5 rounded-full bg-navy-400" aria-hidden="true" /> Series Two</div>
+            <div className="flex items-center gap-2 text-xs text-white/55"><div className="w-2.5 h-2.5 rounded-full bg-gold-400" aria-hidden="true" /> Series 1</div>
+            <div className="flex items-center gap-2 text-xs text-white/55"><div className="w-2.5 h-2.5 rounded-full bg-gold-300" aria-hidden="true" /> Series 2</div>
+            <div className="flex items-center gap-2 text-xs text-white/55"><div className="w-2.5 h-2.5 rounded-full bg-blue-400" aria-hidden="true" /> Series 3</div>
           </div>
         </div>
       </section>

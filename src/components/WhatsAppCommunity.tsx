@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ExternalLink, BookOpen, MessageCircle, Star, Users, Heart, Check } from 'lucide-react';
+import { Users, BookOpen, MessageCircle, Star, Heart, Check, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const communities = [
   {
@@ -12,9 +12,8 @@ const communities = [
     glow:  'rgba(23,50,77,0.28)',
     description: 'Deep daily discussions, reflection questions, prayer encouragement, and meaningful conversations around each devotional encounter.',
     features: ['Daily reflection threads','Prayer requests & support','Weekly scripture deep-dives','Group accountability'],
-    link:    'https://chat.whatsapp.com/HbRO4Dv6nkcAsH08k18c62?s=ms&p=a&ilr=2',
-    btnLabel:'Join Adults Community',
     members: '500+',
+    requiresParent: false,
   },
   {
     id:    'teens',
@@ -26,9 +25,8 @@ const communities = [
     glow:  'rgba(201,152,58,0.28)',
     description: 'A place for honest questions, authentic conversations, scripture reflections, and growing deeper with Jesus alongside other teens.',
     features: ['Honest Q&A threads','Peer encouragement','Scripture challenges','Teen prayer circle'],
-    link:    'https://chat.whatsapp.com/Cbu2FCIbNiKGbs3n5a0Tgl?s=ms&p=a&ilr=2',
-    btnLabel:'Join Teens Community',
     members: '300+',
+    requiresParent: false,
   },
   {
     id:    'kids',
@@ -40,9 +38,8 @@ const communities = [
     glow:  'rgba(107,91,168,0.28)',
     description: 'A parent-guided community where children stay connected to the devotional journey through fun engagement, prayer, and family discussions.',
     features: ['Parent-guided space','Fun family activities',"Children's prayer wall",'Weekly family challenges'],
-    link:    'https://chat.whatsapp.com/BeW94WGjs9oFFyNpVfJhIQ?s=ms&p=a&ilr=2',
-    btnLabel:'Join Kids Community',
     members: '250+',
+    requiresParent: true,
   },
 ];
 
@@ -63,8 +60,6 @@ function WhatsAppIcon({ size = 20, className = '' }: { size?: number; className?
 }
 
 export default function WhatsAppCommunity() {
-  const [hovered, setHovered] = useState<string | null>(null);
-
   return (
     <section className="py-24 bg-ivory-200 relative overflow-hidden" id="community" aria-labelledby="community-heading">
       {/* ambient bg */}
@@ -91,89 +86,78 @@ export default function WhatsAppCommunity() {
 
         {/* Cards */}
         <div className="grid md:grid-cols-3 gap-6 lg:gap-7 mb-12">
-          {communities.map((c) => {
-            const on = hovered === c.id;
-            return (
-              <div key={c.id}
-                className="relative rounded-3xl overflow-hidden transition-all duration-400 cursor-default"
-                style={{
-                  transform: on ? 'translateY(-8px)' : 'translateY(0)',
-                  boxShadow: on
-                    ? `0 28px 56px ${c.glow}, 0 0 0 1.5px ${c.gradA}25`
-                    : '0 4px 20px rgba(23,50,77,0.07)',
-                }}
-                onMouseEnter={() => setHovered(c.id)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                {/* glass bg */}
-                <div className="absolute inset-0" style={{ background: 'rgba(250,248,243,0.96)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }} aria-hidden="true" />
-                {/* border */}
-                <div className="absolute inset-0 rounded-3xl border-2 pointer-events-none transition-all duration-400"
-                  style={{ borderColor: on ? c.gradA : 'rgba(201,152,58,0.14)' }} aria-hidden="true" />
+          {communities.map((c) => (
+            <div key={c.id}
+              className="relative rounded-3xl overflow-hidden transition-all duration-400"
+              style={{ boxShadow: '0 4px 20px rgba(23,50,77,0.07)' }}
+            >
+              {/* glass bg */}
+              <div className="absolute inset-0" style={{ background: 'rgba(250,248,243,0.96)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }} aria-hidden="true" />
+              {/* border */}
+              <div className="absolute inset-0 rounded-3xl border-2 pointer-events-none transition-all duration-400"
+                style={{ borderColor: 'rgba(201,152,58,0.14)' }} aria-hidden="true" />
 
-                {/* light rays on hover */}
-                {on && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1/2 overflow-hidden pointer-events-none opacity-15" aria-hidden="true">
-                    {[-24,-12,0,12,24].map((deg,i)=>(
-                      <div key={i} className="absolute bottom-0 left-1/2 origin-bottom"
-                        style={{ width:'1px', height:'90%', background:`linear-gradient(to top, ${c.gradA}, transparent)`, transform:`translateX(-50%) rotate(${deg}deg)` }} />
-                    ))}
+              {/* Content */}
+              <div className="relative z-10 p-7">
+                {/* top bar */}
+                <div className="w-full h-0.5 rounded-full mb-6"
+                  style={{ background:`linear-gradient(90deg, ${c.gradA}, ${c.gradB})`, opacity: 0.45 }} aria-hidden="true" />
+
+                {/* icon + label */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0"
+                    style={{ background:`${c.gradA}14`, border:`1px solid ${c.gradA}28` }}>
+                    <c.Icon size={21} style={{ color: c.gradA }} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-playfair text-xl font-bold text-navy-700">{c.label}</p>
+                    <p className="text-[0.68rem] font-medium tracking-wider" style={{ color: c.gradA }}>{c.tag}</p>
+                  </div>
+                </div>
+
+                <p className="text-[#6B6B6B] text-sm leading-relaxed mb-5">{c.description}</p>
+
+                <ul className="space-y-2 mb-6" role="list">
+                  {c.features.map((f,i)=>(
+                    <li key={i} className="flex items-center gap-2.5 text-xs text-navy-600">
+                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background:`${c.gradA}15` }}>
+                        <Check size={9} style={{ color: c.gradA }} aria-hidden="true" />
+                      </div>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex items-center gap-1.5 mb-4">
+                  <Users size={12} className="text-navy-300" aria-hidden="true" />
+                  <span className="text-xs text-navy-400">{c.members} members growing daily</span>
+                </div>
+
+                {/* Approval badge for kids */}
+                {c.requiresParent && (
+                  <div className="flex items-center gap-2 mb-4 p-2.5 rounded-xl bg-gold-50 border border-gold-200">
+                    <Shield size={13} className="text-gold-600 shrink-0" aria-hidden="true" />
+                    <p className="text-[0.68rem] text-navy-500 leading-relaxed">
+                      Parent or guardian approval required.
+                    </p>
                   </div>
                 )}
 
-                {/* Content */}
-                <div className="relative z-10 p-7">
-                  {/* top bar */}
-                  <div className="w-full h-0.5 rounded-full mb-6 transition-opacity duration-400"
-                    style={{ background:`linear-gradient(90deg, ${c.gradA}, ${c.gradB})`, opacity: on ? 1 : 0.45 }} aria-hidden="true" />
-
-                  {/* icon + label */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0"
-                      style={{ background:`${c.gradA}14`, border:`1px solid ${c.gradA}28` }}>
-                      <c.Icon size={21} style={{ color: c.gradA }} aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-playfair text-xl font-bold text-navy-700">{c.label}</p>
-                      <p className="text-[0.68rem] font-medium tracking-wider" style={{ color: c.gradA }}>{c.tag}</p>
-                    </div>
-                  </div>
-
-                  <p className="text-[#6B6B6B] text-sm leading-relaxed mb-5">{c.description}</p>
-
-                  <ul className="space-y-2 mb-6" role="list">
-                    {c.features.map((f,i)=>(
-                      <li key={i} className="flex items-center gap-2.5 text-xs text-navy-600">
-                        <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background:`${c.gradA}15` }}>
-                          <Check size={9} style={{ color: c.gradA }} aria-hidden="true" />
-                        </div>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="flex items-center gap-1.5 mb-5">
-                    <Users size={12} className="text-navy-300" aria-hidden="true" />
-                    <span className="text-xs text-navy-400">{c.members} members growing daily</span>
-                  </div>
-
-                  {/* CTA */}
-                  <a href={c.link} target="_blank" rel="noopener noreferrer"
-                    aria-label={`${c.btnLabel} on WhatsApp — opens in new tab`}
-                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-sm font-bold transition-all duration-300"
-                    style={{
-                      background: on ? `linear-gradient(130deg, ${c.gradA}, ${c.gradB})` : `${c.gradA}12`,
-                      color:      on ? '#FAF8F3' : c.gradA,
-                      border:     `1.5px solid ${on ? 'transparent' : c.gradA+'35'}`,
-                    }}>
-                    <WhatsAppIcon size={16} />
-                    {c.btnLabel}
-                    <ExternalLink size={12} className="opacity-65" aria-hidden="true" />
-                  </a>
-                </div>
+                {/* CTA — links to communities page for approval */}
+                <Link to="/communities#whatsapp"
+                  aria-label={`Request to join the ${c.label} community`}
+                  className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 hover:opacity-90"
+                  style={{
+                    background: `${c.gradA}12`,
+                    color: c.gradA,
+                    border: `1.5px solid ${c.gradA}35`,
+                  }}>
+                  <WhatsAppIcon size={16} />
+                  Request to Join
+                </Link>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         {/* Why join bar */}
@@ -201,13 +185,12 @@ export default function WhatsAppCommunity() {
               <p className="text-white/55 text-sm leading-relaxed mb-8 max-w-sm mx-auto">
                 Every encounter with Jesus becomes richer when shared with others. Find your generation. Join the conversation.
               </p>
-              <a href="#community"
-                onClick={(e)=>{ e.preventDefault(); document.getElementById('community')?.scrollIntoView({behavior:'smooth'}); }}
+              <Link to="/communities#whatsapp"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gold-500 hover:bg-gold-400 text-navy-800 font-bold rounded-full transition-all duration-300 shadow-gold hover:-translate-y-0.5"
-                aria-label="Scroll to WhatsApp community cards">
+                aria-label="Go to communities page to request to join">
                 <WhatsAppIcon size={17} />
-                Join Your Community Today
-              </a>
+                Request to Join Your Community
+              </Link>
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ export const faqCategories: FAQCategory[] = [
     items: [
       {
         q: 'What exactly is In Him Daily?',
-        a: 'In Him Daily is a daily devotional series designed to bring three generations of a family face to face with Jesus Christ — simultaneously, every day, each in language and depth appropriate for their age. The series spans six volumes tracing Christ from Genesis to Revelation. Each day is available in three editions: Adult, Teen (ages 13–18), and Children\u2019s (ages 5–12). Same encounter. Same Jesus. Three conversations.',
+        a: 'In Him Daily is a daily devotional series designed to bring three generations of a family face to face with Jesus Christ — simultaneously, every day, each in language and depth appropriate for their age. The series spans three series tracing Christ through His names, His Gospel encounters, and His Old Testament appearances. Each day is available in three editions: Adult, Teen (ages 13–18), and Children\u2019s (ages 5–12). Same encounter. Same Jesus. Three conversations.',
       },
       {
         q: 'How long does each daily devotional take to read?',
@@ -60,11 +60,11 @@ export const faqCategories: FAQCategory[] = [
     items: [
       {
         q: 'Where can I get In Him Daily?',
-        a: 'The complete series is available at inhimdaily.org. You can download the free 7-day sample immediately from the homepage to try all three editions before purchasing. All six volumes are available as digital downloads, with physical editions coming soon. For church or institutional licensing — if you would like to use In Him Daily as the family discipleship curriculum for your church or school — please contact us directly through the website.',
+        a: 'The complete series is available at inhimdaily.org. You can download the free 7-day sample immediately from the homepage to try all three editions before purchasing. All three series are available as digital downloads, with physical editions coming soon. For church or institutional licensing — if you would like to use In Him Daily as the family discipleship curriculum for your church or school — please contact us directly through the website.',
       },
       {
         q: 'How much do the devotionals cost?',
-        a: 'Each volume is available in three editions: Kids ($8), Teen ($10), and Adult ($12). The Complete Family Bundle — all three editions of a volume — is $25. Bulk discounts are available for churches and schools: 20% off for 5–20 bundles, 30% off for 21–50, and 40% off for 51+. All prices are listed in USD, with local currency equivalents available for Kenya, Nigeria, Ghana, South Africa, Uganda, and Tanzania.',
+        a: 'Each series is available in three editions: Kids ($8), Teen ($10), and Adult ($12). The Complete Family Bundle — all three editions of a series — is $25. Bulk discounts are available for churches and schools: 20% off for 5–20 bundles, 30% off for 21–50, and 40% off for 51+. All prices are listed in USD, with local currency equivalents available for Kenya, Nigeria, Ghana, South Africa, Uganda, and Tanzania.',
       },
       {
         q: 'Is there a digital version I can access on my phone or tablet?',
@@ -72,7 +72,7 @@ export const faqCategories: FAQCategory[] = [
       },
       {
         q: 'Are physical books available?',
-        a: 'Physical editions of all six volumes are coming soon. In the meantime, the digital PDF editions are fully formatted for both screen reading and home printing. Sign up for our newsletter at inhimdaily.org to be notified when physical books become available.',
+        a: 'Physical editions of all three series are coming soon. In the meantime, the digital PDF editions are fully formatted for both screen reading and home printing. Sign up for our newsletter at inhimdaily.org to be notified when physical books become available.',
       },
       {
         q: 'Can our church or school use In Him Daily as a group curriculum?',

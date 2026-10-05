@@ -20,7 +20,7 @@ export default function CollectionCards() {
             Explore Every Collection
           </h2>
           <p className="mt-4 text-lg text-[#D0D3D8] max-w-2xl mx-auto leading-[1.6]">
-            Six journeys through Scripture. Each one a doorway into the one story that changes
+            Three series through Scripture. Each one a doorway into the one story that changes
             everything.
           </p>
         </ScrollReveal>
@@ -32,26 +32,25 @@ export default function CollectionCards() {
                 className="rounded-2xl overflow-hidden h-full group transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_64px_rgba(217,166,46,0.2)]"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #3A3A35' }}
               >
-                {/* Three full edition covers side by side */}
-                <div className="relative w-full bg-white/[0.03] border-b border-white/5">
-                  <div className="flex items-stretch justify-center gap-2 sm:gap-3 p-4">
-                    {editionOrder.map((key) => {
-                      const ed = c.editions[key];
-                      return (
-                        <div key={key} className="flex-1 max-w-[33%]">
+                <div className="relative border-b border-white/5 bg-[#0B0E15] p-3 sm:p-4">
+                  <div className="grid grid-cols-3 items-end gap-2 sm:gap-3">
+                    {editionOrder.map((key) => (
+                      <div key={key} className="group/cover flex flex-col items-center gap-2">
+                        <div className="flex aspect-[3/4] w-full items-center justify-center overflow-hidden rounded-lg bg-white/[0.04] p-1.5 transition-transform duration-500 group-hover/cover:-translate-y-1">
                           <img
-                            src={ed.cover}
-                            alt={`${c.title} — ${editionLabels[key]} Edition`}
+                            src={c.editions[key].cover}
+                            alt={`${editionLabels[key]} edition of ${c.title}`}
                             loading="lazy"
-                            className="block w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.03]"
-                            style={{ filter: 'brightness(1.2) contrast(1.1)' }}
+                            decoding="async"
+                            className="block h-full w-full object-contain"
+                            style={{ filter: 'brightness(1.12) contrast(1.08)' }}
                           />
-                          <p className="text-center text-[#D0D3D8] text-xs font-semibold mt-2">
-                            {editionLabels[key]}
-                          </p>
                         </div>
-                      );
-                    })}
+                        <span className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[#D0D3D8]/70">
+                          {editionLabels[key]}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -109,8 +108,8 @@ export default function CollectionCards() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.68rem] font-bold bg-gold-500/20 text-gold-300 border border-gold-400/30">
-                      Available Now
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.68rem] font-bold ${c.id === 'series-3' ? 'bg-white/10 text-white/70 border border-white/20' : 'bg-gold-500/20 text-gold-300 border border-gold-400/30'}`}>
+                      {c.id === 'series-3' ? 'Coming Soon' : 'Available Now'}
                     </span>
                     <Link
                       to="/devotionals"

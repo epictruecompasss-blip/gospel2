@@ -9,19 +9,10 @@ const corsHeaders = {
 
 const FROM_EMAIL = "In Him Daily <hello@inhimdaily.org>";
 const TEAM_EMAIL = Deno.env.get("CONTACT_RECEIVING_EMAIL") || "hello@inhimdaily.org";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-
-async function getConfig(supabase: ReturnType<typeof createClient>, key: string): Promise<string> {
-  const { data, error } = await supabase
-    .from("app_config")
-    .select("value")
-    .eq("key", key)
-    .maybeSingle();
-  if (error || !data) return "";
-  return data.value as string;
-}
 
 interface RequestBody {
   name: string;
@@ -146,12 +137,17 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const supabase = (supabaseUrl && supabaseServiceKey)
-      ? createClient(supabaseUrl, supabaseServiceKey)
-      : null;
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY environment variable is not set");
+      return new Response(
+        JSON.stringify({ error: "Email service is not configured. Please contact us directly at hello@inhimdaily.org." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Save the message to the database first (so it's never lost)
-    if (supabase) {
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
       const { error: dbError } = await supabase.from("contact_messages").insert({
         name: body.name.trim(),
         email: body.email.trim(),
@@ -164,18 +160,6 @@ Deno.serve(async (req: Request) => {
       if (dbError) {
         console.error("Database error:", dbError.message);
       }
-    }
-
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")
-      ?? (supabase ? await getConfig(supabase, "RESEND_API_KEY") : "")
-      ?? "";
-
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is not configured");
-      return new Response(
-        JSON.stringify({ error: "Email service is not configured. Please contact us directly at hello@inhimdaily.org." }),
-        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
     }
 
     // Send notification email to the team via Resend

@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://inhimdaily.com/sitemap.xml
+Sitemap: https://inhimdaily.org/sitemap.xml

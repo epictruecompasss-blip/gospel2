@@ -248,9 +248,9 @@ export type SendEmailPayload = {
 };
 
 /**
- * Sends an email to any address through Resend, via the /api/send-email Netlify
- * function. Requires a signed-in admin session — the function verifies the
- * access token before it will send anything.
+ * Sends an email to any address through Resend, via the send-admin-email
+ * Supabase Edge Function. The edge function reads the API key from app_config,
+ * so it works immediately without a Netlify redeploy.
  */
 export async function sendEmail(payload: SendEmailPayload) {
   const { data: { session } } = await getSupabaseClient().auth.getSession();
@@ -258,19 +258,34 @@ export async function sendEmail(payload: SendEmailPayload) {
     throw new Error('Your session has expired. Please sign in again.');
   }
 
-  const response = await fetch('/api/send-email', {
+  const toArray = Array.isArray(payload.to) ? payload.to : [payload.to];
+  const body: Record<string, unknown> = {
+    to: toArray.join(', '),
+    subject: payload.subject,
+    html: payload.html,
+  };
+  if (payload.text) body.text = payload.text;
+  if (payload.replyTo) {
+    const replyToArray = Array.isArray(payload.replyTo) ? payload.replyTo : [payload.replyTo];
+    body.replyTo = replyToArray.join(', ');
+  }
+  if (payload.attachments && payload.attachments.length > 0) body.attachments = payload.attachments;
+  if (payload.in_reply_to) body.in_reply_to = payload.in_reply_to;
+  if (payload.thread_id) body.thread_id = payload.thread_id;
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/send-admin-email`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok || result.error) {
     throw new Error(result.error ?? `Request failed (${response.status})`);
   }
-  return result as { success: true; id: string | null; message: string };
+  return result as { success: true; message: string };
 }
 
 
@@ -288,6 +303,59 @@ export async function uploadBlogCoverImage(file: File): Promise<string> {
     .from('blog-images')
     .getPublicUrl(filePath);
   return pubData.publicUrl;
+}
+
+/* ─── community join request helpers ─────────────────────────── */
+
+export async function insertCommunityJoinRequest(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  community: 'adults' | 'teens' | 'kids';
+  country?: string;
+  city_region?: string;
+  parent_name?: string;
+  parent_email?: string;
+  age_range?: string;
+  message?: string;
+}) {
+  const { error } = await getSupabaseClient().from('community_join_requests').insert({
+    name:        data.name,
+    email:       data.email,
+    phone:       data.phone || null,
+    community:   data.community,
+    country:     data.country || null,
+    city_region: data.city_region || null,
+    parent_name: data.parent_name || null,
+    parent_email: data.parent_email || null,
+    age_range:   data.age_range || null,
+    message:     data.message || null,
+    status:      'pending',
+  });
+  if (error) throw error;
+}
+
+export async function fetchCommunityJoinRequests(status?: string) {
+  let query = getSupabaseClient()
+    .from('community_join_requests')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (status) query = query.eq('status', status);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function updateCommunityRequestStatus(
+  id: string,
+  status: 'approved' | 'rejected',
+  note?: string
+) {
+  const { error } = await getSupabaseClient()
+    .from('community_join_requests')
+    .update({ status, admin_note: note ?? null, moderated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
 }
 
 /* ─── admin comment moderation helpers ──────────────────────── */

@@ -82,17 +82,16 @@ export default function Hero() {
                   style={{ background: `radial-gradient(circle, ${glowColors[i]} 0%, transparent 70%)` }}
                   aria-hidden="true"
                 />
-                {/* Book cover image — complete, uncropped */}
-                <img
-                  src={book.cover}
-                  alt={`${book.title} devotional cover`}
-                  loading="eager"
-                  className="relative block h-auto w-full object-contain shadow-2xl"
-                  style={{
-                    filter: 'brightness(1.15) contrast(1.08)',
-                    maxWidth: 'clamp(240px, 28vw, 340px)',
-                  }}
-                />
+                <div className="relative flex h-[360px] w-[min(78vw,300px)] items-center justify-center sm:h-[430px] sm:w-[min(28vw,340px)]">
+                  <img
+                    src={book.cover}
+                    alt={`${book.title} devotional cover`}
+                    loading="eager"
+                    decoding="async"
+                    className="relative block max-h-full max-w-full object-contain shadow-2xl"
+                    style={{ filter: 'brightness(1.15) contrast(1.08)' }}
+                  />
+                </div>
               </div>
 
               {/* Labels underneath */}
@@ -133,7 +132,7 @@ export default function Hero() {
         </p>
 
         <p className="mt-4 font-cinzel text-sm sm:text-base text-[#D0D3D8] tracking-[0.15em]">
-          120+ DAYS · MULTIPLE VOLUMES · ONE LIFE-CHANGING JOURNEY
+          290 DAYS · THREE SERIES · ONE LIFE-CHANGING JOURNEY
         </p>
 
         {/* Buttons */}

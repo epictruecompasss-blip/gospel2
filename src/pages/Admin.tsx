@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSupabaseClient, SUPABASE_URL, fetchUnreadEmailCount, fetchPendingCommentsCount, uploadAttachment, sendEmail as sendEmailRequest, type AttachmentMeta } from '@/lib/supabase';
-import { Users, Mail, Heart, MessageSquare, BookOpen, RefreshCw, Rocket, ExternalLink, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, HandHeart, PenLine, LogOut, Send, Save, Eye, EyeOff, X, Reply, Inbox, Paperclip, Plus, Trash2 } from 'lucide-react';
+import { getSupabaseClient, SUPABASE_URL, fetchUnreadEmailCount, fetchPendingCommentsCount, fetchCommunityJoinRequests, updateCommunityRequestStatus, uploadAttachment, sendEmail as sendEmailRequest, type AttachmentMeta } from '@/lib/supabase';
+import { Users, Mail, Heart, MessageSquare, BookOpen, RefreshCw, Rocket, ExternalLink, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, HandHeart, PenLine, LogOut, Send, Save, Eye, EyeOff, X, Reply, Inbox, Paperclip, Plus, Trash2, Shield } from 'lucide-react';
 
 const BlogAdmin = lazy(() => import('./admin/BlogAdmin'));
 const AdminInbox = lazy(() => import('@/components/AdminInbox'));
@@ -13,8 +13,9 @@ type PrayerPartner  = { id: string; name: string; email: string; status: string;
 type PrayerRequest  = { id: string; name: string; email: string | null; request: string; status: string; created_at: string; };
 type ContactMessage = { id: string; name: string; email: string; subject: string; message: string; status: string; country: string | null; city_region: string | null; created_at: string; };
 type Donation = { id: string; name: string; email: string; country: string | null; city_region: string | null; amount: number | null; prayer_request: string | null; message: string | null; status: string; created_at: string; };
+type CommunityRequest = { id: string; name: string; email: string; phone: string | null; community: string; country: string | null; city_region: string | null; parent_name: string | null; parent_email: string | null; age_range: string | null; message: string | null; status: string; admin_note: string | null; created_at: string; moderated_at: string | null; };
 
-type Tab = 'inbox' | 'comments' | 'leads' | 'newsletter' | 'partners' | 'prayers' | 'messages' | 'donations' | 'blog' | 'email';
+type Tab = 'inbox' | 'comments' | 'leads' | 'newsletter' | 'partners' | 'prayers' | 'messages' | 'donations' | 'community' | 'blog' | 'email';
 
 const TABS: { id: Tab; label: string; icon: React.ElementType; color: string; isSettings?: boolean; isNotification?: boolean }[] = [
   { id: 'inbox',     label: 'Inbox',                icon: Inbox,          color: 'text-gold-300', isNotification: true },
@@ -25,6 +26,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType; color: string; is
   { id: 'prayers',   label: 'Prayer Requests',      icon: Heart,          color: 'text-gold-300' },
   { id: 'messages',  label: 'Contact Messages',     icon: MessageSquare,  color: 'text-gold-300' },
   { id: 'donations', label: 'Donations',             icon: HandHeart,      color: 'text-gold-300' },
+  { id: 'community', label: 'Community Requests',    icon: Users,          color: 'text-gold-300' },
   { id: 'blog',      label: 'Blog Articles',        icon: PenLine,        color: 'text-gold-300' },
   { id: 'email',     label: 'Email Settings',       icon: Send,           color: 'text-gold-300', isSettings: true },
 ];
@@ -41,6 +43,9 @@ const STATUS_COLORS: Record<string, string> = {
   closed:       'bg-gray-500/15 text-gray-400 border-gray-500/30',
   unsubscribed: 'bg-gray-500/15 text-gray-400 border-gray-500/30',
   inactive:     'bg-gray-500/15 text-gray-400 border-gray-500/30',
+  pending:      'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  approved:     'bg-green-500/15 text-green-300 border-green-500/30',
+  rejected:     'bg-red-500/15 text-red-300 border-red-500/30',
 };
 
 function fmt(iso: string) {
@@ -61,7 +66,7 @@ export default function AdminPage() {
   const [loading,  setLoading]  = useState(true);
   const [loadError, setLoadError] = useState('');
   const [authChecked, setAuthChecked] = useState(false);
-  const [counts,   setCounts]   = useState<Record<Tab, number>>({ inbox:0, comments:0, leads:0, newsletter:0, partners:0, prayers:0, messages:0, donations:0, blog:0, email:0 });
+  const [counts,   setCounts]   = useState<Record<Tab, number>>({ inbox:0, comments:0, leads:0, newsletter:0, partners:0, prayers:0, messages:0, donations:0, community:0, blog:0, email:0 });
 
   const [resendKey,      setResendKey]      = useState('');
   const [resendFromEmail, setResendFromEmail] = useState('');
@@ -77,6 +82,7 @@ export default function AdminPage() {
   const [prayers,  setPrayers]  = useState<PrayerRequest[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [donations, setDonations] = useState<Donation[]>([]);
+  const [communityRequests, setCommunityRequests] = useState<CommunityRequest[]>([]);
 
   const [composeOpen,    setComposeOpen]    = useState(false);
   const [composeTo,      setComposeTo]      = useState('');
@@ -98,6 +104,16 @@ export default function AdminPage() {
     setAttachments([]);
     setSendResult(null);
     setComposeOpen(true);
+  }
+
+  async function handleCommunityAction(id: string, action: 'approved' | 'rejected') {
+    try {
+      await updateCommunityRequestStatus(id, action);
+      setCommunityRequests(prev => prev.map(r => r.id === id ? { ...r, status: action, moderated_at: new Date().toISOString() } : r));
+      setCounts(prev => ({ ...prev, community: prev.community - 1 }));
+    } catch {
+      setLoadError('Could not update request. Please try again.');
+    }
   }
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -199,17 +215,18 @@ export default function AdminPage() {
 
     try {
       const supabase = getSupabaseClient();
-      const [l, n, pp, pr, m, d, b] = await Promise.all([
+      const [l, n, pp, pr, m, d, cr, b] = await Promise.all([
         supabase.from('free_sample_leads').select('*').order('created_at', { ascending: false }),
         supabase.from('newsletter_subscribers').select('*').order('created_at', { ascending: false }),
         supabase.from('prayer_partners').select('*').order('created_at', { ascending: false }),
         supabase.from('prayer_requests').select('*').order('created_at', { ascending: false }),
         supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
         supabase.from('donations').select('*').order('created_at', { ascending: false }),
+        supabase.from('community_join_requests').select('*').order('created_at', { ascending: false }),
         supabase.from('blog_posts').select('id', { count: 'exact', head: true }),
       ]);
       const blogResult = b as { count?: number; data?: unknown[]; error?: unknown };
-      const requestError = [l, n, pp, pr, m, d, b].find((result) => result.error)?.error;
+      const requestError = [l, n, pp, pr, m, d, cr, b].find((result) => result.error)?.error;
       if (requestError) throw requestError;
 
       setLeads(l.data ?? []);
@@ -218,7 +235,9 @@ export default function AdminPage() {
       setPrayers(pr.data ?? []);
       setMessages(m.data ?? []);
       setDonations(d.data ?? []);
+      setCommunityRequests((cr.data ?? []) as CommunityRequest[]);
       const [unreadE, pendingC] = await Promise.all([fetchUnreadEmailCount(), fetchPendingCommentsCount()]);
+      const pendingCommunity = ((cr.data ?? []) as CommunityRequest[]).filter(r => r.status === 'pending').length;
       setCounts({
         inbox:      unreadE,
         comments:   pendingC,
@@ -228,6 +247,7 @@ export default function AdminPage() {
         prayers:    pr.data?.length   ?? 0,
         messages:   m.data?.length    ?? 0,
         donations:  d.data?.length    ?? 0,
+        community:  pendingCommunity,
         blog:       blogResult.count ?? blogResult.data?.length ?? 0,
         email:      0,
       });
@@ -556,6 +576,40 @@ export default function AdminPage() {
                           <td className="px-5 py-3.5 text-white/60">{r.city_region ?? '—'}</td>
                           <td className="px-5 py-3.5 text-white/60 text-[0.8rem] whitespace-nowrap">{fmt(r.created_at)}</td>
                           <td className="px-5 py-3.5"><button onClick={() => openCompose(r.email, `Re: Your Donation — In Him Daily`)} className="text-gold-300 hover:text-gold-200 transition-colors" aria-label={`Reply to ${r.email}`}><Reply size={15} /></button></td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+              {tab === 'community' && (
+                <table className="w-full text-sm">
+                  <thead className="bg-white/5 text-white/50 text-[0.72rem] uppercase tracking-wider">
+                    <tr>{['Name','Email','Group','Age','Parent/Guardian','Country','Status','Date','Actions'].map(h => <th key={h} className="px-5 py-3 text-left font-semibold">{h}</th>)}</tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    {communityRequests.length === 0 ? <tr><td colSpan={9} className="px-5 py-10 text-center text-white/40">No community requests yet.</td></tr>
+                      : communityRequests.map(r => (
+                        <tr key={r.id} className="hover:bg-white/5 transition-colors">
+                          <td className="px-5 py-3.5 font-medium text-white whitespace-nowrap">{r.name}</td>
+                          <td className="px-5 py-3.5 text-white/60">{r.email}</td>
+                          <td className="px-5 py-3.5 text-white/60 capitalize">{r.community}</td>
+                          <td className="px-5 py-3.5 text-white/60">{r.age_range ?? '—'}</td>
+                          <td className="px-5 py-3.5 text-white/60">{r.parent_name ? `${r.parent_name}` : '—'}{r.parent_email ? ` (${r.parent_email})` : ''}</td>
+                          <td className="px-5 py-3.5 text-white/60">{r.country ?? '—'}</td>
+                          <td className="px-5 py-3.5"><StatusBadge status={r.status} /></td>
+                          <td className="px-5 py-3.5 text-white/60 text-[0.8rem] whitespace-nowrap">{fmt(r.created_at)}</td>
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-2">
+                              {r.status === 'pending' ? (
+                                <>
+                                  <button onClick={() => handleCommunityAction(r.id, 'approved')} className="px-2.5 py-1 rounded-lg bg-green-500/15 text-green-300 border border-green-500/30 text-[0.68rem] font-semibold hover:bg-green-500/25 transition-colors" aria-label="Approve request">Approve</button>
+                                  <button onClick={() => handleCommunityAction(r.id, 'rejected')} className="px-2.5 py-1 rounded-lg bg-red-500/15 text-red-300 border border-red-500/30 text-[0.68rem] font-semibold hover:bg-red-500/25 transition-colors" aria-label="Reject request">Reject</button>
+                                </>
+                              ) : (
+                                <button onClick={() => openCompose(r.email, `Re: Your ${r.community === 'kids' ? 'Kids' : r.community === 'teens' ? 'Teens' : 'Adults'} Community Request — In Him Daily`)} className="text-gold-300 hover:text-gold-200 transition-colors" aria-label={`Reply to ${r.email}`}><Reply size={15} /></button>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                   </tbody>

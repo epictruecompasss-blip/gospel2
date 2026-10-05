@@ -17,7 +17,7 @@ export default function Books() {
 
   useSEO({
     title: 'Books | In Him Daily',
-    description: 'Explore the In Him Daily devotional book collections for adults, teens, and children — five series, three generations, one Jesus.',
+    description: 'Explore the In Him Daily devotional book collections for adults, teens, and children — three series, three generations, one Jesus.',
     canonicalPath: '/books',
   });
 
