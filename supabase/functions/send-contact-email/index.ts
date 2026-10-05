@@ -8,8 +8,7 @@ const corsHeaders = {
 };
 
 const FROM_EMAIL = "In Him Daily <hello@inhimdaily.org>";
-const TEAM_EMAIL = Deno.env.get("CONTACT_RECEIVING_EMAIL") || "hello@inhimdaily.org";
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+const TEAM_EMAIL = "hello@inhimdaily.org";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -30,6 +29,18 @@ function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+async function getConfig(key: string): Promise<string> {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const { data, error } = await supabase
+    .from("app_config")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
+
+  if (error || !data) return "";
+  return data.value;
 }
 
 function buildTeamEmailHtml(data: RequestBody): string {
@@ -137,8 +148,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY environment variable is not set");
+    const resendApiKey = await getConfig("RESEND_API_KEY");
+
+    if (!resendApiKey) {
+      console.error("Resend API key is not configured");
       return new Response(
         JSON.stringify({ error: "Email service is not configured. Please contact us directly at hello@inhimdaily.org." }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -163,7 +176,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Send notification email to the team via Resend
-    const resend = new Resend(RESEND_API_KEY);
+    const resend = new Resend(resendApiKey);
     const { error: sendError } = await resend.emails.send({
       from: FROM_EMAIL,
       to: TEAM_EMAIL,

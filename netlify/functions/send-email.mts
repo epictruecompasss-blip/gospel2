@@ -121,40 +121,32 @@ async function sendContactEmail(body: ContactRequestBody) {
     return json({ error: 'One or more fields exceed the allowed length.' }, 400);
   }
 
-  const apiKey = Netlify.env.get('RESEND_API_KEY')?.trim();
-  if (!apiKey) {
-    return json({ error: 'Email service is not configured.' }, 503);
-  }
-
-  const fromEmail = Netlify.env.get('RESEND_FROM_EMAIL') || DEFAULT_FROM_EMAIL;
-  const teamEmail = Netlify.env.get('CONTACT_RECEIVING_EMAIL') || 'hello@inhimdaily.org';
-  const location = [body.country?.trim(), body.city_region?.trim()].filter(Boolean).join(', ');
+  const { url, anonKey } = supabaseConfig();
 
   try {
-    const resend = new Resend(apiKey);
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: [teamEmail],
-      replyTo: email,
-      subject: `Contact Form: ${subject}`,
-      html: `
-        <h2>New contact form submission</h2>
-        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
-        ${location ? `<p><strong>Location:</strong> ${escapeHtml(location)}</p>` : ''}
-        <p><strong>Message:</strong></p>
-        <p style="white-space: pre-wrap">${escapeHtml(message)}</p>
-      `,
-      text: `New contact form submission from ${name} (${email})\n\nSubject: ${subject}\n\n${message}${location ? `\n\nLocation: ${location}` : ''}`,
+    const response = await fetch(`${url}/functions/v1/send-contact-email`, {
+      method: 'POST',
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        subject,
+        message,
+        country: body.country,
+        city_region: body.city_region,
+      }),
     });
+    const result = await response.json().catch(() => ({}));
 
-    if (error) {
-      console.error('Resend rejected the contact message:', error);
-      return json({ error: 'The email service could not send your message.' }, 502);
+    if (!response.ok || result.error) {
+      return json({ error: result.error ?? 'The email service could not send your message.' }, response.status || 502);
     }
 
-    return json({ success: true, id: data?.id ?? null }, 200);
+    return json({ success: true }, 200);
   } catch (err) {
     console.error('Unexpected contact email error:', err);
     return json({ error: 'Could not send your message. Please try again.' }, 500);
@@ -267,18 +259,9 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Subject and message body are required.' }, 400);
   }
 
-  // The deploy-time secret is the source of truth. A legacy dashboard value is
-  // only a fallback so an old saved key cannot override a rotated Netlify key.
-  const environmentApiKey = Netlify.env.get('RESEND_API_KEY')?.trim() || '';
-  const apiKey = environmentApiKey || (await getConfigValue('RESEND_API_KEY', token));
+  const apiKey = await getConfigValue('RESEND_API_KEY', token);
   if (!apiKey) {
-    return json(
-      {
-        error:
-          'Email service is not configured. Add RESEND_API_KEY as a Netlify environment variable, or save your Resend API key in Email Settings.',
-      },
-      503,
-    );
+    return json({ error: 'Email service is not configured. Save your Resend API key in Email Settings.' }, 503);
   }
 
   const fromEmail =
