@@ -189,6 +189,8 @@ export interface PriceTier {
   highlight?: boolean;
   prices: { currency: string; amount: string }[];
   formats: string[];
+  amazonUrl?: string;
+  selarUrl?: string;
 }
 
 export const pdfPricing: PriceTier[] = [
@@ -197,7 +199,7 @@ export const pdfPricing: PriceTier[] = [
     name: 'Adult Edition',
     tagline: 'Ages 19+',
     prices: [
-      { currency: 'USD', amount: '$12' },
+      { currency: 'USD', amount: '$9.99' },
       { currency: 'KES', amount: '1,600' },
       { currency: 'NGN', amount: '19,000' },
       { currency: 'GHS', amount: '170' },
@@ -205,14 +207,16 @@ export const pdfPricing: PriceTier[] = [
       { currency: 'UGX', amount: '45,000' },
       { currency: 'TZS', amount: '32,000' },
     ],
-    formats: ['PDF'],
+    formats: ['Kindle', 'Paperback'],
+    amazonUrl: 'https://www.amazon.com/dp/B0HP5MW17Q',
+    selarUrl: 'https://selar.com/inhimdaily',
   },
   {
     id: 'teen-pdf',
     name: 'Teen Edition',
     tagline: 'Ages 13–18',
     prices: [
-      { currency: 'USD', amount: '$10' },
+      { currency: 'USD', amount: '$3.99' },
       { currency: 'KES', amount: '1,350' },
       { currency: 'NGN', amount: '16,000' },
       { currency: 'GHS', amount: '142' },
@@ -220,14 +224,16 @@ export const pdfPricing: PriceTier[] = [
       { currency: 'UGX', amount: '37,000' },
       { currency: 'TZS', amount: '27,000' },
     ],
-    formats: ['PDF'],
+    formats: ['Kindle', 'Paperback'],
+    amazonUrl: 'https://www.amazon.com/dp/B0HP6ZWK1',
+    selarUrl: 'https://selar.com/inhimdaily',
   },
   {
     id: 'kids-pdf',
     name: 'Kids Edition',
     tagline: 'Ages 6–12',
     prices: [
-      { currency: 'USD', amount: '$8' },
+      { currency: 'USD', amount: '$6.99' },
       { currency: 'KES', amount: '1,080' },
       { currency: 'NGN', amount: '12,800' },
       { currency: 'GHS', amount: '114' },
@@ -235,7 +241,9 @@ export const pdfPricing: PriceTier[] = [
       { currency: 'UGX', amount: '30,000' },
       { currency: 'TZS', amount: '21,000' },
     ],
-    formats: ['PDF'],
+    formats: ['Kindle', 'Paperback'],
+    amazonUrl: 'https://www.amazon.com/dp/B0HPKLZNB1',
+    selarUrl: 'https://selar.com/inhimdaily',
   },
   {
     id: 'family-bundle',
@@ -251,7 +259,9 @@ export const pdfPricing: PriceTier[] = [
       { currency: 'UGX', amount: '94,000' },
       { currency: 'TZS', amount: '68,000' },
     ],
-    formats: ['PDF'],
+    formats: ['Kindle', 'Paperback'],
+    amazonUrl: 'https://www.amazon.com/s?k=in+him+daily+sir+henry',
+    selarUrl: 'https://selar.com/inhimdaily',
   },
 ];
 
