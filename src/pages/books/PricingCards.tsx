@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Check, Star, Users, Gift, Sparkles } from 'lucide-react';
+import { Check, Star, Users, Gift, Sparkles, ShoppingCart } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import { pdfPricing, bulkPricing, freeEntryPoints } from './assets';
 
@@ -72,21 +71,35 @@ export default function PricingCards() {
                   ))}
                 </ul>
 
-                <Link
-                  to="/devotionals"
-                  className={`inline-flex items-center justify-center gap-2 px-6 rounded-full font-bold transition-all ${
-                    tier.highlight
-                      ? 'text-[#05070D] hover:brightness-110'
-                      : 'text-gold-300 hover:bg-gold-400/10'
-                  }`}
-                  style={
-                    tier.highlight
-                      ? { backgroundColor: '#D9A62E', height: '52px', borderRadius: '26px' }
-                      : { border: '1px solid #D9A62E', height: '52px', borderRadius: '26px' }
-                  }
-                >
-                  BUY NOW
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <a
+                    href={tier.amazonUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center justify-center gap-2 px-6 rounded-full font-bold transition-all ${
+                      tier.highlight
+                        ? 'text-[#05070D] hover:brightness-110'
+                        : 'text-gold-300 hover:bg-gold-400/10'
+                    }`}
+                    style={
+                      tier.highlight
+                        ? { backgroundColor: '#D9A62E', height: '52px', borderRadius: '26px' }
+                        : { border: '1px solid #D9A62E', height: '52px', borderRadius: '26px' }
+                    }
+                  >
+                    <ShoppingCart size={16} />
+                    Buy on Amazon
+                  </a>
+                  <a
+                    href={tier.selarUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-6 rounded-full font-bold transition-all text-white/70 hover:text-white hover:bg-white/10"
+                    style={{ border: '1px solid rgba(255,255,255,0.2)', height: '44px', borderRadius: '22px', fontSize: '0.85rem' }}
+                  >
+                    Buy on Selar (Africa)
+                  </a>
+                </div>
               </div>
             </ScrollReveal>
           ))}
