@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react';
 const LINKS = [
   { to: '/', label: 'Home' },
   { to: '/devotionals', label: 'Devotionals' },
-  { to: '/books', label: 'Books' }
+  { to: '/books', label: 'Books' },
   { to: '/blog', label: 'Blog' },
   { to: '/communities', label: 'Communities' },
   { to: '/prayer-partners', label: 'Prayer' },
