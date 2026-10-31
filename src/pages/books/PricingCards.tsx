@@ -1,7 +1,7 @@
 import { Check, Star, Users, Gift, Sparkles, ShoppingCart } from 'lucide-react';
 import ScrollReveal from '@/components/ScrollReveal';
 import { pdfPricing, bulkPricing, freeEntryPoints } from './assets';
-
+ 
 export default function PricingCards() {
   return (
     <section id="pricing" className="relative py-16 sm:py-20 scroll-mt-24">
